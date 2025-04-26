@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <title>马尾船政知识答题游戏</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('https://i.imgur.com/TwJmK67.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        h1,
+        h2 {
+            color: #FF6B6B;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        #timer {
+            color: #FF9F1C;
+            font-weight: bold;
+        }
+
+        #question-container,
+        #result-container,
+        #score-container,
+        #review-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        #question-container p,
+        #result-container p,
+        #score-container p,
+        #review-container p {
+            color: #2A2A2A;
+        }
+
+        #options button {
+            background-color: #06D6A0;
+            color: white;
+            border: none;
+        }
+
+        #options button:hover {
+            background-color: #05A87D;
+        }
+
+        #next-button {
+            background-color: #118AB2;
+        }
+
+        #next-button:hover {
+            background-color: #0E7496;
+        }
+
+        #review-button {
+            background-color: #FFD166;
+            color: #2A2A2A;
+        }
+
+        #review-button:hover {
+            background-color: #FFC433;
+        }
+
+        #restart-button {
+            background-color: #EF476F;
+        }
+
+        #restart-button:hover {
+            background-color: #D6395D;
+        }
+
+        #back-to-score {
+            background-color: #118AB2;
+        }
+
+        #back-to-score:hover {
+            background-color: #0E7496;
+        }
+
+        .correct-answer {
+            background-color: #28a745 !important;
+        }
+
+        .wrong-answer {
+            background-color: #dc3545 !important;
+        }
+
+        #hint-button {
+            background-color: #FF6B6B;
+            color: white;
+            margin-top: 1rem;
+        }
+
+        #hint-button:hover {
+            background-color: #E55656;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mx-auto my-8">
+        <h1 class="text-3xl font-bold text-center mb-8">马尾船政知识答题游戏</h1>
+        <div id="timer" class="text-center text-lg mb-4 hidden">剩余时间: <span id="time-left">60</span> 秒</div>
+        <div id="question-container" class="bg-white bg-opacity-10 p-8 rounded shadow mb-8">
+            <p id="question" class="text-lg mb-4"></p>
+            <div id="options" class="space-y-2"></div>
+            <button id="hint-button" class="text-white px-4 py-2 rounded">提示</button>
+        </div>
+        <div id="result-container" class="bg-white bg-opacity-10 p-8 rounded shadow hidden">
+            <p id="result-text" class="text-lg mb-4"></p>
+            <button id="next-button" class="text-white px-4 py-2 rounded">下一题</button>
+        </div>
+        <div id="score-container" class="bg-white bg-opacity-10 p-8 rounded shadow hidden">
+            <p id="score-text" class="text-lg mb-4"></p>
+            <p id="easter-egg" class="text-lg text-green-600 hidden">彩蛋 恭喜过关，奖励可爱光辉一枚</p>
+            <button id="review-button" class="px-4 py-2 rounded mr-2">错题回顾</button>
+            <button id="restart-button" class="text-white px-4 py-2 rounded">重新开始</button>
+        </div>
+        <div id="review-container" class="bg-white bg-opacity-10 p-8 rounded shadow hidden">
+            <h2 class="text-2xl font-bold mb-4">错题回顾</h2>
+            <div id="wrong-questions"></div>
+            <button id="back-to-score" class="text-white px-4 py-2 rounded">返回得分页面</button>
+        </div>
+    </div>
+    <script>
+        const questions = [
+            {
+                question: '马尾船政在引进西方造船技术的过程中，为解决技术人才短缺问题采取了多种措施。以下哪一项不属于这些措施？',
+                options: ['聘请洋员担任技术指导', '选派留学生赴欧学习造船和驾驶', '强制当地工匠学习西方技术', '在船政学堂开设专业课程培养人才'],
+                answer: '强制当地工匠学习西方技术',
+                score: 10
+            },
+            {
+                question: '马尾船政学堂培养出的人才在多个领域发挥了重要作用。在近代中国海军建设方面，以下哪位船政学堂毕业生在黄海海战中表现英勇，指挥战舰与敌激战，最终壮烈牺牲？',
+                options: ['邓世昌', '刘步蟾', '林永升', '方伯谦'],
+                answer: '林永升',
+                score: 10
+            },
+            {
+                question: '马尾船政制造的舰船在当时具有一定的技术水平和特点。以下关于船政舰船的描述，正确的是？',
+                options: ['早期舰船多为木壳船，后期逐渐发展为铁胁木壳船和钢甲船', '所有船政舰船均采用蒸汽动力，未配备风帆辅助动力', '船政舰船的武器装备完全依赖进口，没有自主研发', '船政制造的舰船主要用于内河航运，不具备海战能力'],
+                answer: '早期舰船多为木壳船，后期逐渐发展为铁胁木壳船和钢甲船',
+                score: 10
+            },
+            {
+                question: '马尾船政文化对近代中国社会产生了深远影响。从思想文化层面来看，它主要推动了以下哪种思潮的发展？',
+                options: ['洋务思潮', '维新思潮', '民主共和思潮', '实业救国思潮'],
+                answer: '洋务思潮',
+                score: 10
+            },
+            {
+                question: '马尾船政学堂在课程设置上融合了中西文化知识。其前学堂的法文课程中，除了造船技术相关内容外，还包括一门重要的自然科学基础课程，该课程对理解和应用造船技术起到了关键作用，这门课程是？',
+                options: ['数学', '物理', '化学', '天文'],
+                answer: '数学',
+                score: 10
+            },
+            {
+                question: '马尾船政在管理模式上借鉴了西方近代企业的一些做法。以下哪一项体现了船政在管理上的创新举措？',
+                options: ['设立专门的财务部门，进行成本核算和预算管理', '采用家族式管理，任用亲属担任重要职务', '完全按照西方企业模式，不考虑中国国情', '不注重生产效率，以保证产品质量为唯一目标'],
+                answer: '设立专门的财务部门，进行成本核算和预算管理',
+                score: 10
+            },
+            {
+                question: '马尾船政制造的舰船在一些重要战役中发挥了作用。在中法马尾海战中，船政制造的“扬武”号巡洋舰承担了重要任务，它在战斗中的主要表现是？',
+                options: ['遭敌舰围攻，顽强抵抗并击伤敌舰，最终被鱼雷击中下沉', '未参战，提前撤离战场', '在战斗中临阵脱逃，导致战局失利', '被敌人轻易俘获，未进行有效抵抗'],
+                answer: '遭敌舰围攻，顽强抵抗并击伤敌舰，最终被鱼雷击中下沉',
+                score: 10
+            },
+            {
+                question: '马尾船政学堂培养的人才不仅在军事领域有杰出贡献，在文化教育领域也有重要影响。严复作为船政学堂的毕业生，他的主要文化贡献是？',
+                options: ['翻译《天演论》，传播进化论思想', '创作大量爱国诗歌，激发民族精神', '创办新式学堂，培养新式人才', '编写船政相关的技术书籍，传承造船技艺'],
+                answer: '翻译《天演论》，传播进化论思想',
+                score: 10
+            },
+            {
+                question: '马尾船政在舰船制造过程中面临诸多困难和挑战。其中，在原材料供应方面，为解决钢材短缺问题采取的措施是？',
+                options: ['从国外进口钢材，同时尝试自主冶炼', '放弃使用钢材，全部采用木材造船', '与国内其他钢铁厂合作，共同研发钢材', '使用劣质钢材，降低造船质量要求'],
+                answer: '从国外进口钢材，同时尝试自主冶炼',
+                score: 10
+            },
+            {
+                question: '马尾船政文化遗产是中国近代工业文明的重要见证。以下关于马尾船政文化遗产保护和利用的说法，正确的是？',
+                options: ['应注重保护与开发相结合，通过发展文化旅游等方式实现可持续利用', '只需要进行简单的保护，不需要进行开发利用', '为了发展经济，可以大规模开发，不必考虑文化遗产的保护', '文化遗产保护与经济发展无关，应完全禁止开发利用'],
+                answer: '应注重保护与开发相结合，通过发展文化旅游等方式实现可持续利用',
+                score: 10
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let totalScore = 0;
+        let timer;
+        let wrongQuestions = [];
+
+        function startTimer() {
+            let timeLeft = 60;
+            document.getElementById('timer').classList.remove('hidden');
+            document.getElementById('time-left').textContent = timeLeft;
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('time-left').textContent = timeLeft;
+                if (timeLeft === 0) {
+                    clearInterval(timer);
+                    checkAnswer(null);
+                }
+            }, 1000);
+        }
+
+        function showQuestion() {
+            clearInterval(timer);
+            startTimer();
+            const currentQuestion = questions[currentQuestionIndex];
+            document.getElementById('question').textContent = currentQuestion.question;
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('bg-gray-200', 'px-4', 'py-2', 'rounded', 'hover:bg-gray-300');
+                button.addEventListener('click', () => {
+                    clearInterval(timer);
+                    checkAnswer(option, button);
+                });
+                optionsContainer.appendChild(button);
+            });
+            document.getElementById('question-container').classList.remove('hidden');
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('score-container').classList.add('hidden');
+            document.getElementById('review-container').classList.add('hidden');
+        }
+
+        function checkAnswer(selectedOption, selectedButton) {
+            const currentQuestion = questions[currentQuestionIndex];
+            const resultText = document.getElementById('result-text');
+            const optionButtons = document.querySelectorAll('#options button');
+            optionButtons.forEach(button => {
+                if (button.textContent === currentQuestion.answer) {
+                    button.classList.add('correct-answer');
+                }
+            });
+            if (selectedOption === currentQuestion.answer) {
+                totalScore += currentQuestion.score;
+                resultText.textContent = '回答正确！你获得了 ' + currentQuestion.score + ' 分。';
+                selectedButton.classList.add('correct-answer');
+            } else {
+                resultText.textContent = `回答错误，正确答案是：${currentQuestion.answer}，本题分值为 ${currentQuestion.score} 分。`;
+                selectedButton.classList.add('wrong-answer');
+                wrongQuestions.push(currentQuestion);
+            }
+            document.getElementById('question-container').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+            if (currentQuestionIndex === questions.length - 1) {
+                document.getElementById('next-button').textContent = '查看得分';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        function showScore() {
+            const scoreText = document.getElementById('score-text');
+            scoreText.textContent = `你的最终得分是：${totalScore} 分，总分为 100 分。`;
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('score-container').classList.remove('hidden');
+            document.getElementById('timer').classList.add('hidden');
+            document.getElementById('easter-egg').classList.remove('hidden');
+        }
+
+        function reviewWrongQuestions() {
+            const wrongQuestionsContainer = document.getElementById('wrong-questions');
+            wrongQuestionsContainer.innerHTML = '';
+            wrongQuestions.forEach(question => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('mb-4');
+                const questionText = document.createElement('p');
+                questionText.textContent = question.question;
+                questionText.classList.add('font-bold');
+                const answerText = document.createElement('p');
+                answerText.textContent = `正确答案: ${question.answer}，本题分值为 ${question.score} 分。`;
+                questionDiv.appendChild(questionText);
+                questionDiv.appendChild(answerText);
+                wrongQuestionsContainer.appendChild(questionDiv);
+            });
+            document.getElementById('score-container').classList.add('hidden');
+            document.getElementById('review-container').classList.remove('hidden');
+        }
+
+        function backToScore() {
+            document.getElementById('review-container').classList.add('hidden');
+            document.getElementById('score-container').classList.remove('hidden');
+        }
+
+        function restartGame() {
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            wrongQuestions = [];
+            showQuestion();
+        }
+
+        function showHint() {
+            const currentQuestion = questions[currentQuestionIndex];
+            const resultText = document.getElementById('result-text');
+            resultText.textContent = `提示：正确答案包含 "${currentQuestion.answer.slice(0, 2)}"。`;
+            document.getElementById('question-container').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+            document.getElementById('next-button').textContent = '继续答题';
+        }
+
+        document.getElementById('next-button').addEventListener('click', nextQuestion);
+        document.getElementById('review-button').addEventListener('click', reviewWrongQuestions);
+        document.getElementById('restart-button').addEventListener('click', restartGame);
+        document.getElementById('back-to-score').addEventListener('click', backToScore);
+        document.getElementById('hint-button').addEventListener('click', showHint);
+
+        showQuestion();
+    </script>
+</body>
+
+</html>
+    
